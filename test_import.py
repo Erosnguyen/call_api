@@ -8,7 +8,6 @@ from queue import LifoQueue
 from threading import Thread
 from sqlalchemy import create_engine
 import sys
-from check_time import check_time_now
 import connectorx as cx
 from decimal import Decimal
 from datetime import datetime
