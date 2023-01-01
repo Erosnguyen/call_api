@@ -256,7 +256,7 @@ async def browserRun(company, url, ex):
 
     # cdp.on('Network.webSocketFrameSent', printResponse)
 
-    await asyncio.sleep(250000)
+    await asyncio.sleep(28800)
     # await page.close()
     # await browser.close()
 
