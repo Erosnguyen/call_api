@@ -26,7 +26,7 @@ def create_pd():
 engine = create_engine('postgresql://eros:erosnguyen123@192.168.110.17:9998/realtime_data')
 engine_sqlserver = "mssql://dbfin:finpros2022@192.168.110.194%5CSQLEXPRESS:1433/stockdata"
 f = open("log.txt", "a")
-while check_time_now():
+while True:
     try:
         df2=pd.read_csv('realtime_ord.csv',dtype={'INav':'str'},low_memory=False)
         if df2.empty == True:
