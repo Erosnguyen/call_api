@@ -46,8 +46,9 @@ class Query_realtime():
 
 Qr=Query_realtime('2022-12-29')
 now = datetime.now()    
-df = Qr.history_realtime()
-now = datetime.now() 
+df = Qr.query_his_real()
+
 # df.to_sql('test_tsv', engine,if_exists='append',index=False)
-print(df[['Security_Code','Vn30_Basis','Close_Price']])
-print(datetime.now() - now)
+print(df[['Security_Code','Vn30_Basis','Close_Price','Open_Interest']])
+# print(df)
+# print(datetime.now() - now)

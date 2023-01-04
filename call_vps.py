@@ -247,18 +247,10 @@ async def browserRun(company, url, ex):
         except BaseException:
             logging.exception("An exception was thrown!")
             pass
-        # print(json_mess)
-
-    # Calls printResponse when a websocket is received
     cdp.on('Network.webSocketFrameReceived', printResponse)
 
-    # Calls printResponse when a websocket is sent
-
-    # cdp.on('Network.webSocketFrameSent', printResponse)
 
     await asyncio.sleep(28800)
-    # await page.close()
-    # await browser.close()
 
 
 if __name__ == "__main__":

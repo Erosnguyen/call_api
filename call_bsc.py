@@ -9,7 +9,7 @@ import numpy as np
 from sqlalchemy import create_engine
 import redis
 import datetime
-from datetime import datetime
+from datetime import datetime,date
 import connectorx as cx
 engine = create_engine('postgresql://eros:erosnguyen123@192.168.110.17:9998/realtime_data')
 engine_sqlserver = "mssql://dbfin:finpros2022@192.168.110.194%5CSQLEXPRESS:1433/stockdata"
@@ -21,9 +21,14 @@ def create_file():
 def create_pd():
     df = pd.DataFrame(columns=['Type','Security_Code','Exchange_Code','Security_Id','Security_Type','Listed_Shares','Time','Trade_Date','Ceiling_Price','Floor_Price','Ref_Price','Buy_Price1','Buy_Volume1','Buy_Price2','Buy_Volume2','Buy_Price3','Buy_Volume3','Sell_Price1','Sell_Volume1','Sell_Price2','Sell_Volume2','Sell_Price3','Sell_Volume3','Buy_Price4','Buy_Volume4','Buy_Price5','Buy_Volume5','Buy_Price6','Buy_Volume6','Buy_Price7','Buy_Volume7','Buy_Price8','Buy_Volume8','Buy_Price9','Buy_Volume9','Buy_Price10','Buy_Volume10','Sell_Price4','Sell_Volume4','Sell_Price5','Sell_Volume5','Sell_Price6','Sell_Volume6','Sell_Price7','Sell_Volume7','Sell_Price8','Sell_Volume8','Sell_Price9','Sell_Volume9','Sell_Price10','Sell_Volume10','Close_Price','Match_Volume','Match_Value','Diff','Diff_Rate','Open_Price','High_Price','Low_Price','Average_Price','Total_Volume','Total_Value','Match_Price_Pt','Match_Volume_Pt','Total_Pt_Volume','Total_Pt_Value','F_Buy_Volume','F_Buy_Volume_Last','F_Sell_Volume','F_Sell_Volume_Last','F_Buy_Value','F_Sell_Value','F_Room','F_Room_Pct','Total_Room','Buy_Order','Sell_Order','Total_Buy_Volume','Total_Sell_Volume','Remain_Buy','Remain_Sell','Open_Interest','Last_Trade_Date','Vn30_Basis','Stock_Basis','Balance_Price','INav,IIndex'])
     return df
+listColumesName = ['Exchange_Code', 'Time', 'Security_Code', 'Security_Id', 'Trade_Date', 'Security_Type', 'Ceiling_Price', 'Floor_Price', 'Ref_Price',
+                   'Buy_Price3', 'Buy_Volume3', 'Buy_Price2', 'Buy_Volume2', 'Buy_Price1', 'Buy_Volume1',
+                   'Close_Price', 'Match_Volume', 'Diff',
+                   'Sell_Price1', 'Sell_Volume1', 'Sell_Price2', 'Sell_Volume2', 'Sell_Price3', 'Sell_Volume3',
+                   'Total_Volume', 'Total_Value', 'Average_Price', 'Open_Price', 'High_Price', 'Low_Price', 'F_Buy_Volume', 'F_Sell_Volume', 'F_Room', 'Total_Room', 'Open_Interest']
 def trans_mess_bsc(response, ex):
-    str = json.dumps(response['response']['payloadData'], ensure_ascii=False)
-    strData = str.replace('"{', '{')
+    strJson = json.dumps(response['response']['payloadData'], ensure_ascii=False)
+    strData = strJson.replace('"{', '{')
     strData = strData.replace('}"', '}')
     strData = strData.replace('\"ST\":\"2\"', '\"ST\":\"ST\"')
     strData = strData.replace('\"ST\":\"3\"', '\"ST\":\"FU\"')
@@ -46,11 +51,15 @@ def trans_mess_bsc(response, ex):
                     # print('f')
                     df = pd.DataFrame(jsonData['M'][0]['A'][0]['pb']['f'])
                     df['Exchange_Code'] = ex
-                    df['Time'] = jsonData['M'][0]['A'][0]['st']['f']
-                    df['Time'] = pd.to_datetime(df['Time'], errors='ignore')
+                    df['Trade_Date'] = str(date.today())
+                    if 'TD' in df.columns:
+                         df = df.drop(columns=['TD'])
+                    if 'f' in jsonData['M'][0]['A'][0]['st'] is not None:
+                        dateTimeServer = jsonData['M'][0]['A'][0]['st']['f'].split()
+                        if len(dateTimeServer) > 1:
+                            df['Time'] = pd.to_datetime(str(date.today())+" " + dateTimeServer[1], errors='coerce')
                     df.rename(columns={'A': 'Security_Code',
                                        'SI': 'Security_Id',
-                                       'TD': 'Trade_Date',
                                        'ST': 'Security_Type',
                                        'CL': 'Ceiling_Price',
                                        'FL': 'Floor_Price',
@@ -82,23 +91,9 @@ def trans_mess_bsc(response, ex):
                                        'U': 'Total_Room',
                                        'OI': 'Open_Interest',
                                        }, inplace=True)
-                    # Danh sách các colum được insert
-                    listColumesInsert = ['Exchange_Code', 'Time', 'Security_Code', 'Security_Id', 'Trade_Date', 'Security_Type', 'Ceiling_Price', 'Floor_Price', 'Ref_Price',
-                                         'Buy_Price3', 'Buy_Volume3', 'Buy_Price2', 'Buy_Volume2', 'Buy_Price1', 'Buy_Volume1',
-                                         'Close_Price', 'Match_Volume', 'Diff',
-                                         'Sell_Price1', 'Sell_Volume1', 'Sell_Price2', 'Sell_Volume2', 'Sell_Price3', 'Sell_Volume3',
-                                         'Total_Volume', 'Total_Value', 'Average_Price', 'Open_Price', 'High_Price', 'Low_Price', 'F_Buy_Volume', 'F_Sell_Volume', 'F_Room', 'Total_Room', 'Open_Interest']
-                    # kiểm tra nếu colum nằm ngoài danh sách định nghĩa thì xóa
                     for ci in df.columns:
-                        if ci not in listColumesInsert:
+                        if ci not in listColumesName:
                             df = df.drop(columns=[ci])
-                    # xóa các colum chưa định nghĩa trong DB
-                    # listColumnsDrop = ['FC', 'TO', 'TB',
-                    #                    'OIC', 'LTD', 'a', 'ULS', 'FT', 'EXP']
-                    # for c in listColumnsDrop:
-                    #     if c in df.columns:
-                    #         df = df.drop(columns=[c])
-                    # Ép lại kiểu dữ liệu
                     df = df.replace(np.nan, 0, regex=True)
                     df = df.replace('', 0, regex=True)
                     # Chuyển dạng string 1,222,222 thành số
@@ -168,6 +163,7 @@ def trans_mess_bsc(response, ex):
                     print(df)
                     df_m=create_pd()
                     df_m=pd.concat([df_m,df]).fillna(0)
+                    # df_m['Time']=df_m['Time'].dt.strftime("%Y-%m-%d %H:%M:%S")
                 try:                 
                     df_m.to_csv('realtime_ord.csv',index=False,header=False,mode='a')
                 except:
