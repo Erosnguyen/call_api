@@ -28,7 +28,12 @@ def listen_redis(st):
             message = data['data']
             if message and message != 1:
                 df=pd.DataFrame([ast.literal_eval(message.decode('utf-8'))])
-                st.put(df)
+                # st.put(df)
+                try:
+                    df['Time'] = pd.to_datetime(df['Time'])
+                    df.to_csv('realtime_ord3.csv',index=False,header=False,mode='a')
+                except:
+                    df.to_csv('no_time.csv',index=False,header=False,mode='a')
                 
 def trans_load(st):
     while True:
@@ -48,4 +53,4 @@ def run():
     listen_redis_thread.join()
     stack.join()
 if __name__ == '__main__':
-    run()
+    listen_redis(stack)

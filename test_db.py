@@ -31,7 +31,7 @@ class Query_realtime():
                     order by "Time" desc '''
         df=pd.read_sql_query(query,self.db_realtime)
         df.set_index('Time',inplace=True)
-        df2 = df.resample('1Min',closed='right').first()
+        df2 = df.resample('1Min',closed='right').last()
         return df2      
     def query_his_real(self):
         df1=self.history_realtime()
@@ -46,7 +46,7 @@ class Query_realtime():
 
 Qr=Query_realtime('2022-12-29')
 now = datetime.now()    
-df = Qr.query_his_real()
+df = Qr.realtime_ps()
 
 # df.to_sql('test_tsv', engine,if_exists='append',index=False)
 print(df[['Security_Code','Vn30_Basis','Close_Price','Open_Interest']])
