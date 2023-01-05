@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import timedelta
 from datetime import datetime
 import sqlalchemy
+import psycopg2
 def get_vn30f():
     def vn30f():
             return requests.get("https://services.entrade.com.vn/chart-api/chart?from=0&resolution=1&symbol=VN30F1M&to=9999999999").json()
@@ -82,7 +83,17 @@ df['Security_Code']='VN30F1M'
 
 
 
+# delete null
+conn = psycopg2.connect(
+   database="realtime_ps", user='eros', password='erosnguyen123', host='192.168.110.17', port= '9998'
+)
+conn.autocommit = True
+cursor = conn.cursor()
+cursor.execute('''delete from realtime_ord_1m where "Security_Code" is null''')
+conn.commit()
+conn.close()
 
+#import empty
 query=f'''select * from realtime_ord_1m order by "Time"'''  
 db_realtime=sqlalchemy.create_engine('postgresql://client1:finpros2022@192.168.110.17:9998/realtime_ps')
 df2 = pd.read_sql_query(query,db_realtime)
@@ -90,9 +101,7 @@ df2 = pd.read_sql_query(query,db_realtime)
 df_same=df.merge(df2,how='inner',on="Time")
 df=df[~df.Time.isin(df_same.Time)]
 df['Time'] = pd.to_datetime(df['Time'])
-# print(df.loc[pd.to_datetime(df['Time']).dt.date==(pd.Timestamp('2022-12-13').date())])
-# df.to_csv('C:/Users/Kien/.spyder-py3/test.csv',index=False)
+
 
 df.to_sql('realtime_ord_1m', db_realtime,if_exists='append',index=False)
-# df_same[df_same.Time=='12/13/2022 9:01']
 df
