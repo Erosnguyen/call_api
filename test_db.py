@@ -6,9 +6,6 @@ import connectorx as cx
 import datetime
 from datetime import datetime
 import gc
-# engine = sqlalchemy.create_engine('postgresql://eros:erosnguyen123@192.168.110.17:9998/db_test',pool_size=5)
-# engine_sqlserver=sqlalchemy.create_engine('mssql://dbfin:finpros2022@192.168.110.194%5CSQLEXPRESS:1433/stockdata?driver=SQL+Server+Native+Client+11.0')
- 
 class Query_realtime():
     def __init__(self,from_date='2022-10-05'):
         self.from_date=from_date
@@ -22,33 +19,35 @@ class Query_realtime():
                 where "Time" between cast('{self.from_date} 09:00:00' as timestamp) and cast('{to_day} 15:00:00' as timestamp) 
                 order by "Time"'''
         df=pd.read_sql_query(query,self.db_history)
+        # reference_time = '2022-01-10 09:00:00'
+        # df.loc[(df['Total_Volume'] == 0) & (df['Time'] > reference_time), 'Total_Volume'] = None
+        # df['Total_Volume'] = df['Total_Volume'].bfill()
         df.set_index('Time',inplace=True)
         return df
     def realtime_ps(self):
         today = date.today().strftime('%Y_%m_%d')
+        today_query = date.today().strftime('%Y-%m-%d')
+        start_time = pd.to_datetime(f'{today_query} 09:00:00')
         query=f'''select * from  realtime_{today}
                     where "Open_Interest"=(select max("Open_Interest") from realtime_{today}) 
+
                     order by "Time" desc '''
         df=pd.read_sql_query(query,self.db_realtime)
         df.set_index('Time',inplace=True)
-        df2 = df.resample('1Min',closed='right').last()
-        return df2      
+        df2 = df.resample('1Min',closed='right').first()
+        # df2['Close_Price'] = df2['Close_Price'].apply(lambda x: x if x >0 else None)
+        # df2['Total_Volume'] = df2['Total_Volume'].apply(lambda x: x if x >0 else None)
+        # if df2['Close_Price'].isnull().any():
+        #     df2['Close_Price'].fillna(method='bfill', inplace=True)
+        return df2  
     def query_his_real(self):
         df1=self.history_realtime()
         df2=self.realtime_ps()
         df3=pd.concat([df1,df2])
         return df3
-# engine_sqlserver= "mssql://dbfin:finpros2022@192.168.110.194%5CSQLEXPRESS:1433/stockdata"
-# Qr=Query_realtime(from_date='2022-11-21') # Thay doi from_date de lay gia lich su
-# now=datetime.datetime.now()
-# date_time = now.strftime("%Y/%m/%d %H:%M:%S.%f")
 
-
-Qr=Query_realtime('2022-12-29')
+Qr=Query_realtime('2023-01-10')
 now = datetime.now()    
 df = Qr.realtime_ps()
 
-# df.to_sql('test_tsv', engine,if_exists='append',index=False)
-print(df[['Security_Code','Vn30_Basis','Close_Price','Open_Interest']])
-# print(df)
-# print(datetime.now() - now)
+print(df[['Security_Code','Vn30_Basis','Close_Price','Open_Interest','Total_Volume']])
