@@ -6,6 +6,8 @@ from queue import Queue,Empty
 from queue import LifoQueue
 from threading import Thread
 import gc
+from datetime import datetime
+from check_time import check_time_now
 HOST = '192.168.110.15'
 PORT = '6379'
 CHANNEL = 'test'
@@ -23,17 +25,19 @@ def listen_redis(st):
     pub.subscribe(CHANNEL)
 
     while True:
-        data = pub.get_message()
-        if data:
-            message = data['data']
-            if message and message != 1:
-                df=pd.DataFrame([ast.literal_eval(message.decode('utf-8'))])
-                # st.put(df)
-                try:
-                    df['Time'] = pd.to_datetime(df['Time'])
-                    df.to_csv('realtime_ord3.csv',index=False,header=False,mode='a')
-                except:
-                    df.to_csv('no_time.csv',index=False,header=False,mode='a')
+        check_time = check_time_now(datetime.now().time()) 
+        if check_time:
+            data = pub.get_message()
+            if data:
+                message = data['data']
+                if message and message != 1:
+                    df=pd.DataFrame([ast.literal_eval(message.decode('utf-8'))])
+                    # st.put(df)
+                    try:
+                        df['Time'] = pd.to_datetime(df['Time'])
+                        df.to_csv('realtime_ord3.csv',index=False,header=False,mode='a')
+                    except:
+                        df.to_csv('no_time.csv',index=False,header=False,mode='a')
                 
 def trans_load(st):
     while True:

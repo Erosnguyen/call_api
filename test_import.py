@@ -13,6 +13,7 @@ from decimal import Decimal
 from datetime import datetime
 from check_time import check_time_now
 import gc
+from check_time_csv import time_range
 def check_df(value):
     check_text = f"{value}"
     df = pd.read_csv('realtime_ord.csv')
@@ -53,9 +54,9 @@ while True:
             df2=pd.read_csv('realtime_ord3.csv',dtype={'INav':'str'},low_memory=False)
             if df2.empty == True:
                 df2=pd.read_csv('realtime_ord2.csv',dtype={'INav':'str'},low_memory=False)
+        df2 = time_range(df2)
         df2['Time'] = pd.to_datetime(df2['Time'])
         df2['Close_Price'] = df2['Close_Price'].apply(lambda x: x if x >0 else None)
-        # df2['Total_Volume'] = df2['Total_Volume'].apply(lambda x: x if x >0 else None)
         df2.to_sql('realtime_ord_rs', engine,if_exists='append',index=False)
         create_file()
         time.sleep(5)

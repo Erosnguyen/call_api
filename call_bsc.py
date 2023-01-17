@@ -162,7 +162,7 @@ def trans_mess_bsc(response, ex):
 
                     print(df)
                     df_m=create_pd()
-                    df_m=pd.concat([df_m,df]).fillna(0)
+                    df_m=pd.concat([df_m,df])
                     # df_m['Time']=df_m['Time'].dt.strftime("%Y-%m-%d %H:%M:%S")
                 try:                 
                     df_m.to_csv('realtime_ord.csv',index=False,header=False,mode='a')

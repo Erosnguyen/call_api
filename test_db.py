@@ -49,5 +49,5 @@ class Query_realtime():
 Qr=Query_realtime('2023-01-10')
 now = datetime.now()    
 df = Qr.realtime_ps()
-
+# df.to_csv('test20.csv')
 print(df[['Security_Code','Vn30_Basis','Close_Price','Open_Interest','Total_Volume']])

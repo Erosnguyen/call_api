@@ -9,10 +9,12 @@ def time_in_range(start, end, x):
 
 
 
-def check_time_now():
-    start = time(8, 40, 0)
-    end = time(15, 0, 0)
-    if (time_in_range(start, end, datetime.now().time()) == True):
+def check_time_now(time_check):
+    start = time(8, 45, 0)
+    end = time(11, 31, 0)
+    start_afternoon = time(13, 0, 0)
+    end_afternoon = time(15, 0, 0)
+    if (time_in_range(start, end, time_check) == True or time_in_range(start_afternoon, end_afternoon, time_check)==True):
         return True
     else:
         return False
