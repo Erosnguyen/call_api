@@ -39,15 +39,16 @@ class Query_realtime():
         # df2['Total_Volume'] = df2['Total_Volume'].apply(lambda x: x if x >0 else None)
         # if df2['Close_Price'].isnull().any():
         #     df2['Close_Price'].fillna(method='bfill', inplace=True)
-        return df2  
+        return df2
     def query_his_real(self):
         df1=self.history_realtime()
         df2=self.realtime_ps()
         df3=pd.concat([df1,df2])
         return df3
 
-Qr=Query_realtime('2023-01-10')
+Qr=Query_realtime('2023-01-18')
 now = datetime.now()    
 df = Qr.realtime_ps()
+df.to_csv('test.csv')
 # df.to_csv('test20.csv')
 print(df[['Security_Code','Vn30_Basis','Close_Price','Open_Interest','Total_Volume']])

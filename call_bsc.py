@@ -166,6 +166,8 @@ def trans_mess_bsc(response, ex):
                     # df_m['Time']=df_m['Time'].dt.strftime("%Y-%m-%d %H:%M:%S")
                 try:                 
                     df_m.to_csv('realtime_ord.csv',index=False,header=False,mode='a')
+                    if ex == 'Fu':
+                        df_m.to_csv('buy_sell.csv',index=False,header=False,mode='a')
                 except:
                     pass
     else:
