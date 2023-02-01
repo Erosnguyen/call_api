@@ -33,7 +33,7 @@ total_sell = 0
 total_buy = 0
 time_df=''
 current_df = pd.DataFrame()
-# price = 0
+price = 0
 def check_buy_sell():
     while True:
         check_time = check_time_now(datetime.now().time()) 
@@ -68,19 +68,19 @@ def check_buy_sell():
             except:
                 create_file()
                 continue
-            time.sleep(1)
+        time.sleep(0.5)
 def sell_buy_1m():
     while True:
         check_time = check_time_now(datetime.now().time()) 
         if check_time:
-            df=pd.DataFrame(columns=['Status'])
-            f = open('check_pnl.txt',mode='a',encoding='utf-8')
+            df=pd.DataFrame()
+            # f = open('check_pnl.txt',mode='a',encoding='utf-8')
             global total_buy 
             global total_sell
             global time_df
             now = time_df
             try:
-                if total_sell + total_buy >=25:
+                if total_sell + total_buy >=90:
                     if total_sell > total_buy:
                         # f.write(f'predict sell at {now} {price}')
                         # f.write('\n')
@@ -99,6 +99,7 @@ def sell_buy_1m():
                         total_buy , total_sell= 0 , 0
             except:
                 print('error')
+        time.sleep(0.5)
 def run():
     Thread(target=check_buy_sell).start()
     # buy_sell_signal.start()

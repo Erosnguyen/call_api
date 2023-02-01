@@ -7,6 +7,8 @@ from check_time import check_time_now
 from datetime import datetime
 ua = UserAgent()
 
+lots = 2
+
 
 # login
 def login_dnse():
@@ -65,7 +67,9 @@ def delete_signal():
     with open('signal.csv','w',encoding='utf-8') as f:
         f.write('Time,Price,Status')
         f.write('\n')
+
 pos = 0
+
 prev_status = None
 while True:
     check_time = check_time_now(datetime.now().time()) 
@@ -92,19 +96,19 @@ while True:
             if prev_status is None:
                 print("Open Order:",time_df,price,status)
                 if status=='buy':
-                    enter_long(1)
+                    enter_long(lots)
                 elif status=='sell':
-                    enter_short(1)
+                    enter_short(lots)
                 prev_status = status
     
             # If the current status is different from the previous status, it's an open order
             elif prev_status != status:
                 print("Close Order:",time_df,price,status)
-                print(pos)
+                # print(pos)
                 if status=='buy':
-                    enter_long(1)
+                    enter_long(lots)
                 elif status=='sell':
-                    enter_short(1)
+                    enter_short(lots)
                 prev_status = None
                 delete_signal()
                 # prev_status = status
@@ -112,7 +116,7 @@ while True:
             # If the current status is the same as the previous status, it's a holding order
             else:
                 print("Holding:", time_df,price,status)
-        time.sleep(1)
+        time.sleep(0.5)
     
     
     
