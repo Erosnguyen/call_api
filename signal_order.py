@@ -7,7 +7,7 @@ from check_time import check_time_now
 from datetime import datetime
 ua = UserAgent()
 
-lots = 2
+lots = 1
 
 
 # login
@@ -83,18 +83,18 @@ while True:
             next(reader)  # skip the header row
             for row in reader:
                 # Extract the relevant information from each row
-                time_df,price,status = row[0],row[1],row[2]
+                status = row[0]
     
                 # Store the order information
-                orders.append((time_df,price,status))
+                orders.append((status))
         
         # Loop through the orders
         for i, order in enumerate(orders):
-            time_df,price,status = order
+            status = order
     
             # If there's no previous status, it's an open order
             if prev_status is None:
-                print("Open Order:",time_df,price,status)
+                print("Open Order:",status)
                 if status=='buy':
                     enter_long(lots)
                 elif status=='sell':
@@ -103,7 +103,7 @@ while True:
     
             # If the current status is different from the previous status, it's an open order
             elif prev_status != status:
-                print("Close Order:",time_df,price,status)
+                print("Close Order:",status)
                 # print(pos)
                 if status=='buy':
                     enter_long(lots)
@@ -115,7 +115,7 @@ while True:
     
             # If the current status is the same as the previous status, it's a holding order
             else:
-                print("Holding:", time_df,price,status)
+                print("Holding:", status)
         time.sleep(0.5)
     
     
